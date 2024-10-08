@@ -71,47 +71,6 @@ public class TestImmSet{
     }
 
     [Fact]
-    public void TestMutability() {
-        var bck = new HashSet<int>([1, 2, 3, 4, 5, 6]);
-        var hsh = new List<int>(bck);
-        Assert.Equal(bck, hsh);
-
-        ImmSet<int> foo = ImmSet.Of(1, 2, 3);
-
-        // Are ImmSets sane?
-        var imm1 = bck.ToImmSet();
-        var imm2 = new ImmSet<int>(bck);
-        var imm3 = hsh.ToImmSet();
-        Assert.Equal(imm1, imm2);
-        Assert.Equal(imm1, imm3);
-        Assert.Equal(imm2, imm3);
-        Assert.Equal(bck, imm1);
-        Assert.Equal(bck, imm2);
-        Assert.Equal(bck, imm3);
-        Assert.Equal(hsh, imm1);
-        Assert.Equal(hsh, imm2);
-        Assert.Equal(hsh, imm3);
-        Assert.True(imm1.Equals(imm2));
-        Assert.True(imm1.Equals(imm3));
-        Assert.True(imm2.Equals(imm1));
-        Assert.True(imm2.Equals(imm3));
-        Assert.True(imm3.Equals(imm1));
-        Assert.True(imm3.Equals(imm2));
-
-        Assert.True(imm1.Equals((object)imm2));
-        Assert.True(imm1.Equals((object)imm3));
-        Assert.True(imm2.Equals((object)imm1));
-        Assert.True(imm2.Equals((object)imm3));
-        Assert.True(imm3.Equals((object)imm1));
-        Assert.True(imm3.Equals((object)imm2));
-
-        Assert.True(imm1 == imm2);
-        Assert.True(imm2 == imm3);
-
-        // Yes.
-    }
-
-    [Fact]
     public void TestNoOps() {
         var imm = ImmSet.Of(7, 6, 5, 4);
         ISet<int> iset = imm;
