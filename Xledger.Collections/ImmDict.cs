@@ -86,8 +86,7 @@ public class ImmDict<K, V> : IReadOnlyDictionary<K, V>, IDictionary<K, V>, IEqua
 
     /// <inheritdoc />
     public override int GetHashCode() {
-            if (!this.hashComputed) {
-            // http://www.isthe.com/chongo/tech/comp/fnv/#FNV-1a
+        if (!this.hashComputed) {
             var hashCode = -1487460045;
             foreach (var kvp in this) {
                 var next = EqualityComparer<K>.Default.GetHashCode(kvp.Key);
