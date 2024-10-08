@@ -1,0 +1,36 @@
+name: Upload .NET package
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    env:
+      version: ${{ github.event.release.tag_name }}
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Build and pack
+        run: |
+          echo $version
+          echo ${version:1}
+          case $version in v*) true;; *) echo "Git tag must start with a 'v'"; false;; esac
+          export version=${version:1}
+          echo $version
+          dotnet build /p:VersionPrefix=$version --configuration Release Xledger.Sql
+          dotnet pack /p:VersionPrefix=$version --configuration Release Xledger.Sql
+      # https://learn.microsoft.com/en-us/nuget/quickstart/create-and-publish-a-package-using-the-dotnet-cli
+      - name: Push package to nuget
+        run: dotnet nuget push Xledger.Sql/bin/Release/*.nupkg --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json
+        # run: dotnet nuget push Xledger.Sql/bin/Release/*.nupkg --api-key "$NUGET_API_KEY" --source https://apiint.nugettest.org/v3/index.json
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
