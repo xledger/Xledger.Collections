@@ -84,6 +84,9 @@ public sealed class ImmSet<T> : IReadOnlyCollection<T>, ISet<T>, IEquatable<ImmS
         if (this.data.Count != other.data.Count) {
             return false;
         }
+        if (this.hashComputed && other.hashComputed && this.hash != other.hash) {
+            return false;
+        }
 
         return this.data.SetEquals(other.data);
     }
@@ -100,9 +103,15 @@ public sealed class ImmSet<T> : IReadOnlyCollection<T>, ISet<T>, IEquatable<ImmS
     public override int GetHashCode() {
         if (!this.hashComputed) {
             var hashCode = 358481680;
+            var hashes = new int[this.data.Count];
+            var i = 0;
             foreach (var item in this) {
-                var next = EqualityComparer<T>.Default.GetHashCode(item);
-                hashCode = hashCode * -1521134295 + next;
+                hashes[i] = EqualityComparer<T>.Default.GetHashCode(item);
+                ++i;
+            }
+            Array.Sort(hashes);
+            for (i = 0; i < this.data.Count; ++i) {
+                hashCode = hashCode * -1521134295 + hashes[i];
             }
             this.hash = hashCode;
             this.hashComputed = true;

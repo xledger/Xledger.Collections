@@ -70,6 +70,9 @@ public class ImmDict<K, V> : IReadOnlyDictionary<K, V>, IDictionary<K, V>, IEqua
         if (this.data.Count != other.data.Count) {
             return false;
         }
+        if (this.hashComputed && other.hashComputed && this.hash != other.hash) {
+            return false;
+        }
 
         foreach (var kvp in this.data) {
             if (!other.data.TryGetValue(kvp.Key, out var otherValue)
@@ -88,11 +91,18 @@ public class ImmDict<K, V> : IReadOnlyDictionary<K, V>, IDictionary<K, V>, IEqua
     public override int GetHashCode() {
         if (!this.hashComputed) {
             var hashCode = -1487460045;
+            var hashes = new int[this.data.Count];
+            var i = 0;
             foreach (var kvp in this) {
-                var next = EqualityComparer<K>.Default.GetHashCode(kvp.Key);
-                hashCode = hashCode * -1521134295 + next;
-                next = EqualityComparer<V>.Default.GetHashCode(kvp.Value);
-                hashCode = hashCode * -1521134295 + next;
+                var next = 524287;
+                next = next * -1521134295 + EqualityComparer<K>.Default.GetHashCode(kvp.Key);
+                next = next * -1521134295 + EqualityComparer<V>.Default.GetHashCode(kvp.Value);
+                hashes[i] = next;
+                ++i;
+            }
+            Array.Sort(hashes);
+            for (i = 0; i < this.data.Count; ++i) {
+                hashCode = hashCode * -1521134295 + hashes[i];
             }
             this.hash = hashCode;
             this.hashComputed = true;

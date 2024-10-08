@@ -67,7 +67,7 @@ public sealed class ImmArray<T> : IReadOnlyList<T>, IEquatable<ImmArray<T>>, ILi
         if (this.data.Length != other.data.Length) {
             return false;
         }
-        if (this.hashComputed && other.hashComputed && GetHashCode() != other.GetHashCode()) {
+        if (this.hashComputed && other.hashComputed && this.hash != other.hash) {
             return false;
         }
 

@@ -52,6 +52,17 @@ public class TestImmDict {
     }
 
     [Fact]
+    public void TestHashCode() {
+        var items = Enumerable.Range(-100, 1_000).ToDictionary(i => i.ToString(), i => (i * i).ToString() + "A");
+        var imm = items.ToImmDict();
+        var ritems = Enumerable.Range(-100, 1_000).Reverse().ToDictionary(i => i.ToString(), i => (i * i).ToString() + "A");
+        var two = ritems.ToImmDict();
+
+        Assert.Equal(imm.GetHashCode(), two.GetHashCode());
+        Assert.True(imm == two);
+    }
+
+    [Fact]
     public void TestNoOps() {
         var imm = ImmDict.Of((7, 6), (5, 4));
         IDictionary<int, int> idict = imm;
