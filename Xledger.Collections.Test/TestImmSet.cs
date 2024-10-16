@@ -32,6 +32,15 @@ public class TestImmSet{
         Assert.Equal(imm2, imm1);
     }
 
+#if NET8_0_OR_GREATER
+    [Fact]
+    public void TestCollectionBuilder() {
+        var ys = ImmSet.Of("hi", "how", "are", "you?");
+        ImmSet<string> xs = ["hi", "how", "are", "you?"];
+        Assert.Equal(ys, xs);
+    }
+#endif
+
     [Fact]
     public void TestCopy() {
         int[] arr = [1, 2, 3, 4, 5, 6];

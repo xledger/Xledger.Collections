@@ -4,11 +4,20 @@ public static class ImmSet {
     public static ImmSet<T> Of<T>(params T[] arr) {
         return arr.ToImmSet();
     }
+
+#if NET
+    public static ImmSet<T> Of<T>(ReadOnlySpan<T> span) {
+        return span.ToImmSet();
+    }
+#endif
 }
 
 [Serializable]
 [DebuggerDisplay("Count = {Count}")]
 [DebuggerTypeProxy(typeof(ImmSet<>.DebugView))]
+#if NET8_0_OR_GREATER
+[System.Runtime.CompilerServices.CollectionBuilder(typeof(ImmSet), nameof(ImmArray.Of))]
+#endif
 public sealed class ImmSet<T> : IReadOnlyCollection<T>, ISet<T>, IEquatable<ImmSet<T>>, ICollection
 #if NET6_0_OR_GREATER
     , IReadOnlySet<T>

@@ -4,11 +4,20 @@ public static class ImmArray {
     public static ImmArray<T> Of<T>(params T[] arr) {
         return arr.ToImmArray();
     }
+
+#if NET
+    public static ImmArray<T> Of<T>(ReadOnlySpan<T> span) {
+        return span.ToImmArray();
+    }
+#endif
 }
 
 [Serializable]
 [DebuggerDisplay("Count = {Count}")]
 [DebuggerTypeProxy(typeof(ImmArray<>.DebugView))]
+#if NET8_0_OR_GREATER
+[System.Runtime.CompilerServices.CollectionBuilder(typeof(ImmArray), nameof(ImmArray.Of))]
+#endif
 public sealed class ImmArray<T> : IReadOnlyList<T>, IEquatable<ImmArray<T>>, IList<T>,
     ICollection, IComparable, IComparable<ImmArray<T>>, IStructuralComparable
 {
