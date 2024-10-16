@@ -12,6 +12,12 @@ public static class Extensions {
         };
     }
 
+#if NET
+    public static ImmArray<T> ToImmArray<T>(this ReadOnlySpan<T> xs) {
+        return new ImmArray<T>(xs.ToArray());
+    }
+#endif
+
     public static ImmSet<T> ToImmSet<T>(this IEnumerable<T> xs) {
         return xs switch {
             null => ImmSet<T>.Empty,
@@ -19,6 +25,12 @@ public static class Extensions {
             _ => new ImmSet<T>(SetOf(xs)),
         };
     }
+
+#if NET
+    public static ImmSet<T> ToImmSet<T>(this ReadOnlySpan<T> xs) {
+        return new ImmSet<T>(xs.ToArray());
+    }
+#endif
 
     public static ImmDict<K, V> ToImmDict<K, V>(this IEnumerable<KeyValuePair<K, V>> xs) {
         return xs switch {
