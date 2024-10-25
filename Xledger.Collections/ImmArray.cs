@@ -121,6 +121,13 @@ public sealed class ImmArray<T> : IReadOnlyList<T>, IEquatable<ImmArray<T>>, ILi
         return this.data.Length > 0 && IndexOf(item) >= 0;
     }
 
+    /// <summary>
+    /// Returns the first matching element or default if none matches.
+    /// </summary>
+    public T Find(Predicate<T> pred) {
+        return Array.Find(this.data, pred);
+    }
+
     /// <inheritdoc />
     public int IndexOf(T item) {
         return Array.IndexOf<T>(this.data, item);

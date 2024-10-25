@@ -146,6 +146,21 @@ public class TestImmArray {
         Assert.ThrowsAny<ArgumentException>(() => imm2 >= imm1);
     }
 
+    [Fact]
+    public void TestFind() {
+        var arr = Enumerable.Range(-1, 100).ToArray();
+        var imm = arr.ToImmArray();
+
+        Predicate<int> pred = i => i == -1;
+        Assert.Equal(Array.Find(arr, pred), imm.Find(pred));
+        pred = i => i == 12;
+        Assert.Equal(Array.Find(arr, pred), imm.Find(pred));
+        pred = i => i == 75;
+        Assert.Equal(Array.Find(arr, pred), imm.Find(pred));
+        pred = i => i == 1_000_000;
+        Assert.Equal(Array.Find(arr, pred), imm.Find(pred));
+    }
+
     public record Employee(int Id, string Name, decimal Salary);
 }
 

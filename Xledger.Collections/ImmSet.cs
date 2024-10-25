@@ -182,6 +182,13 @@ public sealed class ImmSet<T> : IReadOnlyCollection<T>, ISet<T>, IEquatable<ImmS
         }
     }
 
+    /// <summary>
+    /// Searches the set for a given value and returns the equal value it finds, if any.
+    /// </summary>
+    public bool TryGetValue(T equalValue, out T actualValue) {
+        return this.data.TryGetValue(equalValue, out actualValue);
+    }
+
     /// <inheritdoc />
     public override string ToString() {
         return $"[{string.Join(", ", this.data)}]";
