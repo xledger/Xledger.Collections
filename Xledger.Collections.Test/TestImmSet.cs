@@ -80,6 +80,25 @@ public class TestImmSet{
     }
 
     [Fact]
+    public void TestTryGetValue() {
+        var imm = ImmSet.Of("foo", "bar", "baz");
+
+        var lookup = "food".Substring(0, 3);
+        var found = imm.TryGetValue(lookup, out var actual);
+        Assert.True(found);
+        Assert.NotSame(lookup, actual);
+        Assert.Equal(lookup, actual);
+
+        found = imm.TryGetValue("foo", out actual);
+        Assert.True(found);
+        Assert.Same("foo", actual);
+        Assert.Equal("foo", actual);
+
+        found = imm.TryGetValue("food", out actual);
+        Assert.False(found);
+    }
+
+    [Fact]
     public void TestNoOps() {
         var imm = ImmSet.Of(7, 6, 5, 4);
         ISet<int> iset = imm;
