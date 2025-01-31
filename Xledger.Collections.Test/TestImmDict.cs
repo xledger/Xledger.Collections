@@ -71,6 +71,34 @@ public class TestImmDict {
         Assert.ThrowsAny<NotSupportedException>(() => idict.Remove(4));
         Assert.ThrowsAny<NotSupportedException>(() => ((System.Collections.ICollection)idict).CopyTo((Array)null, 0));
     }
+
+    [Fact]
+    public void TestSelectKey() {
+        var dct = Enumerable.Range(-100, 1_000).ToDictionary(i => i);
+        var imm = Enumerable.Range(-100, 1_000).ToImmDict(i => i);
+
+        for (int i = -1000; i < 2000; ++i) {
+            Assert.Equal(dct.ContainsKey(i), imm.ContainsKey(i));
+            if (dct.TryGetValue(i, out var dctValue)) {
+                imm.TryGetValue(i, out var immValue);
+                Assert.Equal(dctValue, immValue);
+            }
+        }
+    }
+
+    [Fact]
+    public void TestSelectKeySelectValue() {
+        var dct = Enumerable.Range(-100, 1_000).ToDictionary(i => i, i => (i * i).ToString());
+        var imm = Enumerable.Range(-100, 1_000).ToImmDict(i => i, i => (i * i).ToString());
+
+        for (int i = -1000; i < 2000; ++i) {
+            Assert.Equal(dct.ContainsKey(i), imm.ContainsKey(i));
+            if (dct.TryGetValue(i, out var dctValue)) {
+                imm.TryGetValue(i, out var immValue);
+                Assert.Equal(dctValue, immValue);
+            }
+        }
+    }
 }
 
 

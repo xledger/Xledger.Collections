@@ -47,6 +47,23 @@ public static class Extensions {
         };
     }
 
+    public static ImmDict<K, T> ToImmDict<T, K>(this IEnumerable<T> xs, Func<T, K> selectKey) {
+        return xs switch {
+            null => ImmDict<K, T>.Empty,
+            _ => new ImmDict<K, T>(xs.ToDictionary(selectKey)),
+        };
+    }
+
+    public static ImmDict<K, V> ToImmDict<T, K, V>(
+        this IEnumerable<T> xs,
+        Func<T, K> selectKey,
+        Func<T, V> selectVal
+    ) {
+        return xs switch {
+            null => ImmDict<K, V>.Empty,
+            _ => new ImmDict<K, V>(xs.ToDictionary(selectKey, selectVal)),
+        };
+    }
     internal static T[] ArrayOf<T>(T[] arr) {
         return (T[])arr.Clone();
     }
