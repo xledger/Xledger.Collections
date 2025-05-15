@@ -40,4 +40,8 @@
     <None Include="../README.md" Pack="true" PackagePath="/" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)'=='net48'">
+    <PackageReference Include="System.Memory" Version="4.6.3" />
+  </ItemGroup>
+
 </Project>
