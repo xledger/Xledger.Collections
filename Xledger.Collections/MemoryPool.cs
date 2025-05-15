@@ -13,14 +13,6 @@ public static class MemoryPool {
     }
 
     /// <summary>
-    /// Returns an IMemoryOwner`1 backed by a regularly allocated array. Dispose
-    /// does nothing on this. This should be used to adapt to an existing API.
-    /// </summary>
-    public static IMemoryOwner<T> FromArray<T>(T[] array) {
-        return new ArrayBackedMemoryOwner<T>(array);
-    }
-
-    /// <summary>
     /// Returns an IMemoryOwner`1 with a Memory property of len. Takes ownership
     /// of memoryOwner and returns the underlying Memory object via that memoryOwner's
     /// Dispose.
