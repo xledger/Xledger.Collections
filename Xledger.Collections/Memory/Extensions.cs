@@ -190,7 +190,7 @@ public static class Extensions {
     /// <returns></returns>
     public static IMemoryOwner<T> ToOwnedMemory<T>(this T[] @this, ArrayPool<T> owner = null) {
         if (owner is null) {
-            return new UnownedMemoryOwner<T>(@this);
+            return new UnownedArrayMemory<T>(@this);
         } else {
             return new OwnedArrayMemory<T>(@this, owner);
         }
