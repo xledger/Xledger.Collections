@@ -75,10 +75,11 @@ public static class Extensions {
             }
         } catch (Exception) {
             currentOwner.Dispose();
+            throw;
+        } finally {
             if (!leaveOpen) {
                 source.Dispose();
             }
-            throw;
         }
 
         return currentOwner.Slice(totalBytesRead);
@@ -136,10 +137,11 @@ public static class Extensions {
             }
         } catch (Exception) {
             currentOwner.Dispose();
+            throw;
+        } finally {
             if (!leaveOpen) {
                 source.Dispose();
             }
-            throw;
         }
 
         return currentOwner.Slice(totalBytesRead);
