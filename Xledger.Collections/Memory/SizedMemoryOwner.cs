@@ -8,10 +8,18 @@ sealed class SizedMemoryOwner<T> : IMemoryOwner<T> {
     IMemoryOwner<T> memoryOwner;
 
     internal SizedMemoryOwner(IMemoryOwner<T> memoryOwner, int start) {
+        if (memoryOwner == null) {
+            throw new ArgumentNullException(nameof(memoryOwner));
+        }
+        this.memoryOwner = memoryOwner;
         Memory = memoryOwner.Memory.Slice(start);
     }
 
     internal SizedMemoryOwner(IMemoryOwner<T> memoryOwner, int start, int length) {
+        if (memoryOwner == null) {
+            throw new ArgumentNullException(nameof(memoryOwner));
+        }
+        this.memoryOwner = memoryOwner;
         Memory = memoryOwner.Memory.Slice(start, length);
     }
 
@@ -19,7 +27,7 @@ sealed class SizedMemoryOwner<T> : IMemoryOwner<T> {
 
     void Dispose(bool disposing) {
         if (this.isDisposed.TrySet()) {
-            this.memoryOwner?.Dispose();
+            this.memoryOwner.Dispose();
             this.memoryOwner = null;
         }
     }
