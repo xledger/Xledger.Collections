@@ -38,7 +38,9 @@ public static class Extensions {
 
         try {
             while (true) {
-                int bytesRead = source.Read(currentBuffer.Span);
+                var dest = currentBuffer.Slice(totalBytesRead);
+
+                int bytesRead = source.Read(dest.Span);
 
                 if (bytesRead == 0) {
                     break;
@@ -100,7 +102,9 @@ public static class Extensions {
             while (true) {
                 tok.ThrowIfCancellationRequested();
 
-                int bytesRead = await source.ReadAsync(currentBuffer, tok).ConfigureAwait(false);
+                var dest = currentBuffer.Slice(totalBytesRead);
+
+                int bytesRead = await source.ReadAsync(dest, tok).ConfigureAwait(false);
 
                 if (bytesRead == 0) {
                     break;
