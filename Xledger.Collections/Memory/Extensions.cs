@@ -181,4 +181,20 @@ public static class Extensions {
         return bufferSize;
     }
 #endif
+
+    /// <summary>
+    /// Adapt an array to IMemoryOwner. If you pass in an ArrayPool owner, the Array will be returned to the pool on dispose.
+    /// If you pass null for the owner, nothing will happen when it is disposed.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="this"></param>
+    /// <param name="owner"></param>
+    /// <returns></returns>
+    public static IMemoryOwner<T> ToOwnedMemory<T>(this T[] @this, ArrayPool<T> owner = null) {
+        if (owner is null) {
+            return new UnownedMemoryOwner<T>(@this);
+        } else {
+            return new OwnedArrayMemory<T>(@this, owner);
+        }
+    }
 }
