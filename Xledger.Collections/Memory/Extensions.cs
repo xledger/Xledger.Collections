@@ -38,9 +38,7 @@ public static class Extensions {
 
         try {
             while (true) {
-                var dest = currentBuffer.Slice(totalBytesRead);
-
-                int bytesRead = source.Read(dest.Span);
+                int bytesRead = source.Read(currentBuffer.Span);
 
                 if (bytesRead == 0) {
                     break;
@@ -68,7 +66,7 @@ public static class Extensions {
                 var newOwner = MemoryPool<byte>.Shared.Rent((int)newCapacity);
                 var newBuffer = newOwner.Memory;
 
-                currentBuffer.Slice(0, totalBytesRead).CopyTo(newBuffer);
+                currentBuffer.CopyTo(newBuffer);
                 currentOwner.Dispose();
                 currentOwner = newOwner;
                 currentBuffer = newBuffer;
@@ -82,7 +80,7 @@ public static class Extensions {
             }
         }
 
-        return currentOwner.Slice(totalBytesRead);
+        return currentOwner.Slice(0, totalBytesRead);
     }
 
     static readonly byte[] ASYNC_PROBE = new byte[1];
@@ -102,9 +100,7 @@ public static class Extensions {
             while (true) {
                 tok.ThrowIfCancellationRequested();
 
-                var dest = currentBuffer.Slice(totalBytesRead);
-
-                int bytesRead = await source.ReadAsync(dest, tok).ConfigureAwait(false);
+                int bytesRead = await source.ReadAsync(currentBuffer, tok).ConfigureAwait(false);
 
                 if (bytesRead == 0) {
                     break;
@@ -131,7 +127,7 @@ public static class Extensions {
                 var newOwner = MemoryPool<byte>.Shared.Rent((int)newCapacity);
                 var newBuffer = newOwner.Memory;
 
-                currentBuffer.Slice(0, totalBytesRead).CopyTo(newBuffer);
+                currentBuffer.CopyTo(newBuffer);
                 currentOwner.Dispose();
                 currentOwner = newOwner;
                 currentBuffer = newBuffer;
@@ -145,7 +141,7 @@ public static class Extensions {
             }
         }
 
-        return currentOwner.Slice(totalBytesRead);
+        return currentOwner.Slice(0, totalBytesRead);
     }
 
     // Copied from System.IO.Stream, adapted to be static

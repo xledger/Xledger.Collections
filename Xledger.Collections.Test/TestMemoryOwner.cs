@@ -1,4 +1,6 @@
 using System.Buffers;
+using System.IO;
+using System.Threading.Tasks;
 using Xledger.Collections.Memory;
 
 namespace Xledger.Collections.Test;
@@ -20,4 +22,22 @@ public class TestMemoryOwner {
         IMemoryOwner<byte> sliced2 = sliced.Slice(1, 4);
         Assert.Equal(array.AsMemory().Slice(3).Slice(1, 4), sliced2.Memory);
     }
+
+#if NET
+    [Fact]
+    public void TestStream_ToMemoryOwner() {
+        byte[] array = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+        var ms = new MemoryStream(array);
+        using var memoryOwner = ms.ToOwnedMemory();
+        Assert.Equal(array.AsMemory(), memoryOwner.Memory);
+    }
+
+    [Fact]
+    public async Task TestStream_ToMemoryOwnerAsync() {
+        byte[] array = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+        var ms = new MemoryStream(array);
+        using var memoryOwner = await ms.ToOwnedMemoryAsync();
+        Assert.Equal(array.AsMemory(), memoryOwner.Memory);
+    }
+#endif
 }
