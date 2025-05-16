@@ -3,7 +3,7 @@ using System.Buffers;
 namespace Xledger.Collections.Memory;
 
 public class EmptyMemoryOwner<T> : IMemoryOwner<T> {
-    public static IMemoryOwner<T> Instance = new EmptyMemoryOwner<T>();
+    public readonly static IMemoryOwner<T> Instance = new EmptyMemoryOwner<T>();
 
     EmptyMemoryOwner() { }
 
