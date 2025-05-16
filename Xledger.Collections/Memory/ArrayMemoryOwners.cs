@@ -4,7 +4,7 @@ using Xledger.Collections.Concurrent;
 namespace Xledger.Collections.Memory;
 
 class UnownedArrayMemory<T> : IMemoryOwner<T> {
-    SetOnceFlag isDisposed = new SetOnceFlag();
+    readonly SetOnceFlag isDisposed = new SetOnceFlag();
     Memory<T> memory;
 
     public Memory<T> Memory {
@@ -20,6 +20,7 @@ class UnownedArrayMemory<T> : IMemoryOwner<T> {
         if (array is null) {
             throw new ArgumentNullException(nameof(array));
         }
+        this.memory = array;
     }
 
     public void Dispose() {
@@ -30,7 +31,7 @@ class UnownedArrayMemory<T> : IMemoryOwner<T> {
 }
 
 class OwnedArrayMemory<T>(T[] array, ArrayPool<T> owner) : IMemoryOwner<T> {
-    SetOnceFlag isDisposed = new SetOnceFlag();
+    readonly SetOnceFlag isDisposed = new SetOnceFlag();
     Memory<T> memory = array;
 
     public Memory<T> Memory {
