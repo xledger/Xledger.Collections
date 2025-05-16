@@ -53,8 +53,8 @@ public static class Extensions {
                 }
 
                 if (currentBuffer.Length == Array.MaxLength) {
-                    using var probeOwner = MemoryPool<byte>.Shared.Rent(1);
-                    if (source.Read(probeOwner.Memory.Slice(0, 1).Span) > 0) {
+                    Span<byte> probe = stackalloc byte[1];
+                    if (source.Read(probe) > 0) {
                         throw new IOException($"Stream exceeds the maximum bufferable array size of {Array.MaxLength} bytes.");
                     }
                     break; // we are at the end of the stream
@@ -84,6 +84,8 @@ public static class Extensions {
 
         return currentOwner.Slice(totalBytesRead);
     }
+
+    static readonly byte[] ASYNC_PROBE = new byte[1];
 
     public static async Task<IMemoryOwner<byte>> ToOwnedMemoryAsync(this Stream source, bool leaveOpen = false, CancellationToken tok = default) {
         if (source == null) {
@@ -115,8 +117,7 @@ public static class Extensions {
                 }
 
                 if (currentBuffer.Length == Array.MaxLength) {
-                    using var probeOwner = MemoryPool<byte>.Shared.Rent(1);
-                    if (await source.ReadAsync(probeOwner.Memory.Slice(0, 1), tok).ConfigureAwait(false) > 0) {
+                    if (await source.ReadAsync(ASYNC_PROBE, tok).ConfigureAwait(false) > 0) {
                         throw new IOException($"Stream exceeds the maximum bufferable array size of {Array.MaxLength} bytes.");
                     }
                     break; // we are at the end of the stream
