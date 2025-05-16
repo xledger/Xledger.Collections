@@ -24,14 +24,6 @@ public static class Extensions {
         return new SizedMemoryOwner<T>(memoryOwner, start, length);
     }
 
-    // Since .NET Framework doesn't define Array.MaxLength.
-    static readonly int ArrayMaxLength =
-#if NETFRAMEWORK
-        int.MaxValue;
-#else
-        Array.MaxLength;
-#endif
-
 #if NET
     public static IMemoryOwner<byte> ToOwnedMemory(this Stream source) {
         if (source == null) {
@@ -60,17 +52,17 @@ public static class Extensions {
                     continue;
                 }
 
-                if (currentBuffer.Length == ArrayMaxLength) {
+                if (currentBuffer.Length == Array.MaxLength) {
                     using var probeOwner = MemoryPool<byte>.Shared.Rent(1);
                     if (source.Read(probeOwner.Memory.Slice(0, 1).Span) > 0) {
-                        throw new IOException($"Stream exceeds the maximum bufferable array size of {ArrayMaxLength} bytes.");
+                        throw new IOException($"Stream exceeds the maximum bufferable array size of {Array.MaxLength} bytes.");
                     }
                     break; // we are at the end of the stream
                 }
 
                 var newCapacity = (long)currentBuffer.Length * 2;
-                if (newCapacity > ArrayMaxLength) {
-                    newCapacity = ArrayMaxLength;
+                if (newCapacity > Array.MaxLength) {
+                    newCapacity = Array.MaxLength;
                 }
 
                 var newOwner = MemoryPool<byte>.Shared.Rent((int)newCapacity);
@@ -118,17 +110,17 @@ public static class Extensions {
                     continue;
                 }
 
-                if (currentBuffer.Length == ArrayMaxLength) {
+                if (currentBuffer.Length == Array.MaxLength) {
                     using var probeOwner = MemoryPool<byte>.Shared.Rent(1);
                     if (await source.ReadAsync(probeOwner.Memory.Slice(0, 1), tok).ConfigureAwait(false) > 0) {
-                        throw new IOException($"Stream exceeds the maximum bufferable array size of {ArrayMaxLength} bytes.");
+                        throw new IOException($"Stream exceeds the maximum bufferable array size of {Array.MaxLength} bytes.");
                     }
                     break; // we are at the end of the stream
                 }
 
                 var newCapacity = (long)currentBuffer.Length * 2;
-                if (newCapacity > ArrayMaxLength) {
-                    newCapacity = ArrayMaxLength;
+                if (newCapacity > Array.MaxLength) {
+                    newCapacity = Array.MaxLength;
                 }
 
                 var newOwner = MemoryPool<byte>.Shared.Rent((int)newCapacity);
