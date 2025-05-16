@@ -7,14 +7,21 @@ namespace Xledger.Collections.Memory;
 
 public static class Extensions {
     /// <summary>
-    /// Returns an IMemoryOwner`1 with a Memory property of len. Takes ownership
-    /// of memoryOwner and returns the underlying Memory object via that memoryOwner's
-    /// Dispose.
+    /// Returns an IMemoryOwner`1 with its Memory property properly sliced. Takes
+    /// ownership of memoryOwner and returns the underlying Memory object via
+    /// that memoryOwner's Dispose.
     /// </summary>
-    /// <remarks>This is in part why an instance of EmptyMemoryOwner isn't
-    /// returned when len = 0. The memory in memoryOwner must be returned.</remarks>
-    public static IMemoryOwner<T> Slice<T>(this IMemoryOwner<T> memoryOwner, int len) {
-        return new SizedMemoryOwner<T>(memoryOwner, len);
+    public static IMemoryOwner<T> Slice<T>(this IMemoryOwner<T> memoryOwner, int start) {
+        return new SizedMemoryOwner<T>(memoryOwner, start);
+    }
+
+    /// <summary>
+    /// Returns an IMemoryOwner`1 with its Memory property properly sliced. Takes
+    /// ownership of memoryOwner and returns the underlying Memory object via
+    /// that memoryOwner's Dispose.
+    /// </summary>
+    public static IMemoryOwner<T> Slice<T>(this IMemoryOwner<T> memoryOwner, int start, int length) {
+        return new SizedMemoryOwner<T>(memoryOwner, start, length);
     }
 
     // Since .NET Framework doesn't define Array.MaxLength.

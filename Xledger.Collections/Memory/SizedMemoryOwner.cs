@@ -1,11 +1,21 @@
-﻿using System.Buffers;
+using System.Buffers;
 
 namespace Xledger.Collections.Memory;
 
-sealed class SizedMemoryOwner<T>(IMemoryOwner<T> memoryOwner, int capacity) : IMemoryOwner<T> {
-    public Memory<T> Memory { get; } = memoryOwner.Memory.Slice(0, capacity);
+sealed class SizedMemoryOwner<T> : IMemoryOwner<T> {
+    IMemoryOwner<T> memoryOwner;
+
+    internal SizedMemoryOwner(IMemoryOwner<T> memoryOwner, int start) {
+        Memory = memoryOwner.Memory.Slice(start);
+    }
+
+    internal SizedMemoryOwner(IMemoryOwner<T> memoryOwner, int start, int length) {
+        Memory = memoryOwner.Memory.Slice(start, length);
+    }
+
+    public Memory<T> Memory { get; }
 
     public void Dispose() {
-        memoryOwner.Dispose();
+        this.memoryOwner.Dispose();
     }
 }
