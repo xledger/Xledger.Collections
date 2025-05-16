@@ -25,7 +25,7 @@ public static class Extensions {
     }
 
 #if NET
-    public static IMemoryOwner<byte> ToOwnedMemory(this Stream source) {
+    public static IMemoryOwner<byte> ToOwnedMemory(this Stream source, bool leaveOpen = false) {
         if (source == null) {
             throw new ArgumentNullException(nameof(source));
         }
@@ -75,13 +75,16 @@ public static class Extensions {
             }
         } catch (Exception) {
             currentOwner.Dispose();
+            if (!leaveOpen) {
+                source.Dispose();
+            }
             throw;
         }
 
         return currentOwner.Slice(totalBytesRead);
     }
 
-    public static async Task<IMemoryOwner<byte>> ToOwnedMemoryAsync(this Stream source, CancellationToken tok = default) {
+    public static async Task<IMemoryOwner<byte>> ToOwnedMemoryAsync(this Stream source, bool leaveOpen = false, CancellationToken tok = default) {
         if (source == null) {
             throw new ArgumentNullException(nameof(source));
         }
@@ -133,6 +136,9 @@ public static class Extensions {
             }
         } catch (Exception) {
             currentOwner.Dispose();
+            if (!leaveOpen) {
+                source.Dispose();
+            }
             throw;
         }
 
