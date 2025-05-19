@@ -30,7 +30,7 @@ public static class Extensions {
             throw new ArgumentNullException(nameof(source));
         }
 
-        int initialBufLen = GetCopyBufferSize(source);
+        (bool canHoldEntireStream, int initialBufLen) = GetBufferSize(source);
 
         var currentOwner = MemoryPool<byte>.Shared.Rent(initialBufLen);
         var currentBuffer = currentOwner.Memory;
@@ -47,6 +47,11 @@ public static class Extensions {
                 }
 
                 totalBytesRead += bytesRead;
+
+                if (canHoldEntireStream && totalBytesRead == initialBufLen) {
+                    // We've read the entire stream.
+                    break;
+                }
 
                 if (totalBytesRead != currentBuffer.Length) {
                     continue;
@@ -92,7 +97,7 @@ public static class Extensions {
             throw new ArgumentNullException(nameof(source));
         }
 
-        int initialBufLen = GetCopyBufferSize(source);
+        (bool canHoldEntireStream, int initialBufLen) = GetBufferSize(source);
 
         var currentOwner = MemoryPool<byte>.Shared.Rent(initialBufLen);
         var currentBuffer = currentOwner.Memory;
@@ -111,6 +116,11 @@ public static class Extensions {
                 }
 
                 totalBytesRead += bytesRead;
+
+                if (canHoldEntireStream && totalBytesRead == initialBufLen) {
+                    // We've read the entire stream.
+                    break;
+                }
 
                 if (totalBytesRead != currentBuffer.Length) {
                     continue;
@@ -148,8 +158,9 @@ public static class Extensions {
         return currentOwner.Slice(0, totalBytesRead);
     }
 
-    // Copied from System.IO.Stream, adapted to be static
-    static int GetCopyBufferSize(Stream stream) {
+    // Initially copied from System.IO.Stream, adapted to be static and to match
+    // the use above which is to copy an entire stream into a single array.
+    static (bool isSufficient, int length) GetBufferSize(Stream stream) {
         // This value was originally picked to be the largest multiple of 4096 that is still smaller than the large object heap threshold (85K).
         // The CopyTo{Async} buffer is short-lived and is likely to be collected at Gen0, and it offers a significant improvement in Copy
         // performance.  Since then, the base implementations of CopyTo{Async} have been updated to use ArrayPool, which will end up rounding
@@ -158,6 +169,7 @@ public static class Extensions {
         // benefits to using the larger buffer size.  So, for now, this value remains.
         const int DefaultCopyBufferSize = 81920;
 
+        bool isSufficient = false;
         int bufferSize = DefaultCopyBufferSize;
 
         if (stream.CanSeek) {
@@ -172,14 +184,17 @@ public static class Extensions {
                 bufferSize = 1;
             } else {
                 long remaining = length - position;
-                if (remaining > 0) {
-                    // In the case of a positive overflow, stick to the default size
-                    bufferSize = (int)Math.Min(bufferSize, remaining);
+                if (remaining > Array.MaxLength) {
+                    throw new IOException($"Stream exceeds the maximum bufferable array size of {Array.MaxLength} bytes.");
+                } else if (remaining > 0) {
+                    // If there is some remaining amount in the stream, we copy into a buffer of that size.
+                    isSufficient = true;
+                    bufferSize = (int)remaining;
                 }
             }
         }
 
-        return bufferSize;
+        return (isSufficient, bufferSize);
     }
 #endif
 
