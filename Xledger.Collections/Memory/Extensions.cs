@@ -31,7 +31,7 @@ public static class Extensions {
         int.MaxValue;
 #endif
 
-    static readonly byte[] PROBE = new byte[1];
+    static readonly ThreadLocal<byte[]> PROBE = new(() => new byte[1]);
 
     public static IMemoryOwner<byte> ToOwnedMemory(this Stream source, bool leaveOpen = false) {
         if (source == null) {
@@ -67,7 +67,12 @@ public static class Extensions {
                 }
 
                 if (currentBuffer.Length == ArrayMaxLength) {
-                    if (source.Read(PROBE, 0, 1) > 0) {
+#if NET
+                    Span<byte> probe = stackalloc byte[1];
+                    if (source.Read(probe) > 0) {
+#else
+                    if (source.Read(PROBE.Value, 0, 1) > 0) {
+#endif
                         throw new IOException($"Stream exceeds the maximum bufferable array size of {ArrayMaxLength} bytes.");
                     }
                     break; // we are at the end of the stream
@@ -135,7 +140,7 @@ public static class Extensions {
                 }
 
                 if (currentBuffer.Length == ArrayMaxLength) {
-                    if (await source.ReadAsync(PROBE, 0, 1, tok).ConfigureAwait(false) > 0) {
+                    if (await source.ReadAsync(PROBE.Value, 0, 1, tok).ConfigureAwait(false) > 0) {
                         throw new IOException($"Stream exceeds the maximum bufferable array size of {ArrayMaxLength} bytes.");
                     }
                     break; // we are at the end of the stream
