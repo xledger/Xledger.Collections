@@ -24,7 +24,15 @@ public static class Extensions {
         return new SizedMemoryOwner<T>(memoryOwner, start, length);
     }
 
+    static readonly int ArrayMaxLength =
 #if NET
+        Array.MaxLength;
+#else
+        int.MaxValue;
+#endif
+
+    static readonly byte[] PROBE = new byte[1];
+
     public static IMemoryOwner<byte> ToOwnedMemory(this Stream source, bool leaveOpen = false) {
         if (source == null) {
             throw new ArgumentNullException(nameof(source));
@@ -32,15 +40,16 @@ public static class Extensions {
 
         (bool canHoldEntireStream, int initialBufLen) = GetBufferSize(source);
 
-        var currentOwner = MemoryPool<byte>.Shared.Rent(initialBufLen);
-        var currentBuffer = currentOwner.Memory;
+        var currentBuffer = ArrayPool<byte>.Shared.Rent(initialBufLen);
+        var currentOwner = currentBuffer.ToOwnedMemory(ArrayPool<byte>.Shared);
         int totalBytesRead = 0;
 
         try {
             while (true) {
-                var dest = currentBuffer.Slice(totalBytesRead);
-
-                int bytesRead = source.Read(dest.Span);
+                int bytesRead = source.Read(
+                    currentBuffer,
+                    totalBytesRead,
+                    currentBuffer.Length - totalBytesRead);
 
                 if (bytesRead == 0) {
                     break;
@@ -57,23 +66,22 @@ public static class Extensions {
                     continue;
                 }
 
-                if (currentBuffer.Length == Array.MaxLength) {
-                    Span<byte> probe = stackalloc byte[1];
-                    if (source.Read(probe) > 0) {
-                        throw new IOException($"Stream exceeds the maximum bufferable array size of {Array.MaxLength} bytes.");
+                if (currentBuffer.Length == ArrayMaxLength) {
+                    if (source.Read(PROBE, 0, 1) > 0) {
+                        throw new IOException($"Stream exceeds the maximum bufferable array size of {ArrayMaxLength} bytes.");
                     }
                     break; // we are at the end of the stream
                 }
 
                 var newCapacity = (long)currentBuffer.Length * 2;
-                if (newCapacity > Array.MaxLength) {
-                    newCapacity = Array.MaxLength;
+                if (newCapacity > ArrayMaxLength) {
+                    newCapacity = ArrayMaxLength;
                 }
 
-                var newOwner = MemoryPool<byte>.Shared.Rent((int)newCapacity);
-                var newBuffer = newOwner.Memory;
+                var newBuffer = ArrayPool<byte>.Shared.Rent((int)newCapacity);
+                var newOwner = newBuffer.ToOwnedMemory(ArrayPool<byte>.Shared);
 
-                currentBuffer.CopyTo(newBuffer);
+                currentBuffer.CopyTo(newBuffer.AsSpan());
                 currentOwner.Dispose();
                 currentOwner = newOwner;
                 currentBuffer = newBuffer;
@@ -90,8 +98,6 @@ public static class Extensions {
         return currentOwner.Slice(0, totalBytesRead);
     }
 
-    static readonly byte[] ASYNC_PROBE = new byte[1];
-
     public static async Task<IMemoryOwner<byte>> ToOwnedMemoryAsync(this Stream source, bool leaveOpen = false, CancellationToken tok = default) {
         if (source == null) {
             throw new ArgumentNullException(nameof(source));
@@ -99,17 +105,19 @@ public static class Extensions {
 
         (bool canHoldEntireStream, int initialBufLen) = GetBufferSize(source);
 
-        var currentOwner = MemoryPool<byte>.Shared.Rent(initialBufLen);
-        var currentBuffer = currentOwner.Memory;
+        var currentBuffer = ArrayPool<byte>.Shared.Rent(initialBufLen);
+        var currentOwner = currentBuffer.ToOwnedMemory(ArrayPool<byte>.Shared);
         int totalBytesRead = 0;
 
         try {
             while (true) {
                 tok.ThrowIfCancellationRequested();
 
-                var dest = currentBuffer.Slice(totalBytesRead);
-
-                int bytesRead = await source.ReadAsync(dest, tok).ConfigureAwait(false);
+                int bytesRead = await source.ReadAsync(
+                    currentBuffer,
+                    totalBytesRead,
+                    currentBuffer.Length - totalBytesRead,
+                    tok).ConfigureAwait(false);
 
                 if (bytesRead == 0) {
                     break;
@@ -126,22 +134,22 @@ public static class Extensions {
                     continue;
                 }
 
-                if (currentBuffer.Length == Array.MaxLength) {
-                    if (await source.ReadAsync(ASYNC_PROBE, tok).ConfigureAwait(false) > 0) {
-                        throw new IOException($"Stream exceeds the maximum bufferable array size of {Array.MaxLength} bytes.");
+                if (currentBuffer.Length == ArrayMaxLength) {
+                    if (await source.ReadAsync(PROBE, 0, 1, tok).ConfigureAwait(false) > 0) {
+                        throw new IOException($"Stream exceeds the maximum bufferable array size of {ArrayMaxLength} bytes.");
                     }
                     break; // we are at the end of the stream
                 }
 
                 var newCapacity = (long)currentBuffer.Length * 2;
-                if (newCapacity > Array.MaxLength) {
-                    newCapacity = Array.MaxLength;
+                if (newCapacity > ArrayMaxLength) {
+                    newCapacity = ArrayMaxLength;
                 }
 
-                var newOwner = MemoryPool<byte>.Shared.Rent((int)newCapacity);
-                var newBuffer = newOwner.Memory;
+                var newBuffer = ArrayPool<byte>.Shared.Rent((int)newCapacity);
+                var newOwner = newBuffer.ToOwnedMemory(ArrayPool<byte>.Shared);
 
-                currentBuffer.CopyTo(newBuffer);
+                currentBuffer.CopyTo(newBuffer.AsSpan());
                 currentOwner.Dispose();
                 currentOwner = newOwner;
                 currentBuffer = newBuffer;
@@ -184,8 +192,8 @@ public static class Extensions {
                 bufferSize = 1;
             } else {
                 long remaining = length - position;
-                if (remaining > Array.MaxLength) {
-                    throw new IOException($"Stream exceeds the maximum bufferable array size of {Array.MaxLength} bytes.");
+                if (remaining > ArrayMaxLength) {
+                    throw new IOException($"Stream exceeds the maximum bufferable array size of {ArrayMaxLength} bytes.");
                 } else if (remaining > 0) {
                     // If there is some remaining amount in the stream, we copy into a buffer of that size.
                     isSufficient = true;
@@ -196,7 +204,6 @@ public static class Extensions {
 
         return (isSufficient, bufferSize);
     }
-#endif
 
     /// <summary>
     /// Adapt an array to IMemoryOwner. If you pass in an ArrayPool owner, the Array will be returned to the pool on dispose.
