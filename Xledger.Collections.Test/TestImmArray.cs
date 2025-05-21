@@ -161,6 +161,16 @@ public class TestImmArray {
         Assert.Equal(Array.Find(arr, pred), imm.Find(pred));
     }
 
+    [Fact]
+    public void TestSpan() {
+        var imm = Enumerable.Range(-1, 100).ToArray().ToImmArray();
+        var span = imm.Span;
+        Assert.Equal(imm.Length, span.Length);
+        for (int i = 0; i < imm.Length; i++) {
+            Assert.Equal(imm[i], span[i]);
+        }
+    }
+
     public record Employee(int Id, string Name, decimal Salary);
 }
 

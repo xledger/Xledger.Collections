@@ -55,6 +55,8 @@ public sealed class ImmArray<T> : IReadOnlyList<T>, IEquatable<ImmArray<T>>, ILi
         }
     }
 
+    public ReadOnlySpan<T> Span => this.data;
+
     /// <inheritdoc />
     public T this[int index] => this.data[index];
 
