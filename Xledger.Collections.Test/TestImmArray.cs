@@ -172,5 +172,16 @@ public class TestImmArray {
     }
 
     public record Employee(int Id, string Name, decimal Salary);
+
+    [Fact]
+    public void TestToImmArrayWithFunc() {
+        var arr = Enumerable.Range(-1, 100).Select(i => $"{i}: {2*i}").ToArray();
+        var imm = Enumerable.Range(-1, 100).ToImmArray(i => $"{i}: {2 * i}");
+        Assert.Equal(arr.Length, imm.Length);
+        Assert.Equal("-1: -2", imm[0]);
+        for (int i = 0; i < imm.Length; ++i) {
+            Assert.Equal(arr[i], imm[i]);
+        }
+    }
 }
 

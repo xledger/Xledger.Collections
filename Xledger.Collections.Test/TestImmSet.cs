@@ -107,6 +107,15 @@ public class TestImmSet{
         Assert.ThrowsAny<NotSupportedException>(() => iset.Remove(4));
         Assert.ThrowsAny<NotSupportedException>(() => ((System.Collections.ICollection)iset).CopyTo((Array)null, 0));
     }
+
+    [Fact]
+    public void TestSelect() {
+        var imm = Enumerable.Range(-10, 21).ToImmSet(Math.Abs);
+        Assert.Equal(11, imm.Count);
+        for (int i = 0; i < 10; ++i) {
+            Assert.Contains(i, (ISet<int>)imm);
+        }
+    }
 }
 
 

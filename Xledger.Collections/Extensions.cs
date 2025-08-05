@@ -12,6 +12,16 @@ public static class Extensions {
         };
     }
 
+    public static ImmArray<U> ToImmArray<T, U>(this IEnumerable<T> xs, Func<T, U> selector) {
+        return xs switch {
+            null => ImmArray<U>.Empty,
+            T[] arr => new ImmArray<U>(ArrayOf(arr.Length, arr, selector)),
+            ICollection<T> coll => new ImmArray<U>(ArrayOf(coll.Count, coll, selector)),
+            IReadOnlyCollection<T> roColl => new ImmArray<U>(ArrayOf(roColl.Count, roColl, selector)),
+            _ => new ImmArray<U>(ArrayOf(xs, selector)),
+        };
+    }
+
 #if NET
     public static ImmArray<T> ToImmArray<T>(this ReadOnlySpan<T> xs) {
         return new ImmArray<T>(xs.ToArray());
@@ -23,6 +33,13 @@ public static class Extensions {
             null => ImmSet<T>.Empty,
             ImmSet<T> immSet => immSet,
             _ => new ImmSet<T>(SetOf(xs)),
+        };
+    }
+
+    public static ImmSet<U> ToImmSet<T, U>(this IEnumerable<T> xs, Func<T, U> selector) {
+        return xs switch {
+            null => ImmSet<U>.Empty,
+            _ => new ImmSet<U>(SetOf(xs, selector)),
         };
     }
 
@@ -64,6 +81,7 @@ public static class Extensions {
             _ => new ImmDict<K, V>(xs.ToDictionary(selectKey, selectVal)),
         };
     }
+
     internal static T[] ArrayOf<T>(T[] arr) {
         return (T[])arr.Clone();
     }
@@ -92,8 +110,30 @@ public static class Extensions {
         return lst.ToArray();
     }
 
+    internal static U[] ArrayOf<T, U>(int n, IEnumerable<T> xs, Func<T, U> f) {
+        var arr = new U[n];
+        var i = 0;
+        foreach (var x in xs) {
+            arr[i] = f(x);
+            ++i;
+        }
+        return arr;
+    }
+
+    internal static U[] ArrayOf<T, U>(IEnumerable<T> xs, Func<T, U> f) {
+        var lst = new List<U>();
+        foreach (var x in xs) {
+            lst.Add(f(x));
+        }
+        return lst.ToArray();
+    }
+
     internal static HashSet<T> SetOf<T>(IEnumerable<T> xs) {
         return new HashSet<T>(xs);
+    }
+
+    internal static HashSet<U> SetOf<T, U>(IEnumerable<T> xs, Func<T, U> f) {
+        return new HashSet<U>(xs.Select(f));
     }
 
     internal static Dictionary<K, V> DictOf<K, V>(IEnumerable<KeyValuePair<K, V>> xs) {
