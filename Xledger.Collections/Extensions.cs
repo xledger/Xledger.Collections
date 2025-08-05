@@ -12,13 +12,13 @@ public static class Extensions {
         };
     }
 
-    public static ImmArray<U> ToImmArray<T, U>(this IEnumerable<T> xs, Func<T, U> select) {
+    public static ImmArray<U> ToImmArray<T, U>(this IEnumerable<T> xs, Func<T, U> selector) {
         return xs switch {
             null => ImmArray<U>.Empty,
-            T[] arr => new ImmArray<U>(ArrayOf(arr.Length, arr, select)),
-            ICollection<T> coll => new ImmArray<U>(ArrayOf(coll.Count, coll, select)),
-            IReadOnlyCollection<T> roColl => new ImmArray<U>(ArrayOf(roColl.Count, roColl, select)),
-            _ => new ImmArray<U>(ArrayOf(xs, select)),
+            T[] arr => new ImmArray<U>(ArrayOf(arr.Length, arr, selector)),
+            ICollection<T> coll => new ImmArray<U>(ArrayOf(coll.Count, coll, selector)),
+            IReadOnlyCollection<T> roColl => new ImmArray<U>(ArrayOf(roColl.Count, roColl, selector)),
+            _ => new ImmArray<U>(ArrayOf(xs, selector)),
         };
     }
 
@@ -36,10 +36,10 @@ public static class Extensions {
         };
     }
 
-    public static ImmSet<U> ToImmSet<T, U>(this IEnumerable<T> xs, Func<T, U> select) {
+    public static ImmSet<U> ToImmSet<T, U>(this IEnumerable<T> xs, Func<T, U> selector) {
         return xs switch {
             null => ImmSet<U>.Empty,
-            _ => new ImmSet<U>(SetOf(xs, select)),
+            _ => new ImmSet<U>(SetOf(xs, selector)),
         };
     }
 
