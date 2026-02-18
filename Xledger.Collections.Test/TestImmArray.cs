@@ -183,5 +183,21 @@ public class TestImmArray {
             Assert.Equal(arr[i], imm[i]);
         }
     }
+
+    [Fact]
+    public void TestNewSized() {
+        var arr = Enumerable.Range(-1, 100).Select(i => $"{i}: {2 * i}").ToArray();
+        var imm = ImmArray.NewSized<string>(100, static span => {
+            for (int i = 0; i < span.Length; ++i) {
+                var j = i - 1;
+                span[i] = $"{j}: {2 * j}";
+            }
+        });
+        Assert.Equal(arr.Length, imm.Length);
+        Assert.Equal("-1: -2", imm[0]);
+        for (int i = 0; i < imm.Length; ++i) {
+            Assert.Equal(arr[i], imm[i]);
+        }
+    }
 }
 

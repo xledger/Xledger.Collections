@@ -116,6 +116,14 @@ public class TestImmSet{
             Assert.Contains(i, (ISet<int>)imm);
         }
     }
+
+    [Fact]
+    public void TestNew() {
+        var imm = Enumerable.Range(-10, 21).ToImmSet(Math.Abs);
+        var imm2 = ImmSet.New<int>(set => set.AddRange(Enumerable.Range(-10, 21).Select(Math.Abs)));
+        Assert.Equal(11, imm.Count);
+        Assert.Equivalent(imm, imm2);
+    }
 }
 
 
