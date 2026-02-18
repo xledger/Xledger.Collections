@@ -22,7 +22,7 @@ public static class ImmArray {
 
 #if NET10_0_OR_GREATER
     [System.Runtime.CompilerServices.OverloadResolutionPriority(1)]
-    public static ImmArray<T> NewSized<T>(int length, Action<Span<T>> fill) {
+    public static ImmArray<T> New<T>(int length, Action<Span<T>> fill) {
         var data = new T[length];
         fill(data);
         return new ImmArray<T>(data);
@@ -31,19 +31,11 @@ public static class ImmArray {
 
     public delegate void FillSpan<T>(Span<T> span);
 
-    public static ImmArray<T> NewSized<T>(int length, FillSpan<T> fill) {
+    public static ImmArray<T> New<T>(int length, FillSpan<T> fill) {
         var data = new T[length];
         fill(data);
         return new ImmArray<T>(data);
     }
-
-#if NET
-    public static ImmArray<T> NewSized<T, Ctx>(int length, Ctx ctx, System.Buffers.SpanAction<T, Ctx> fill) {
-        var data = new T[length];
-        fill(data, ctx);
-        return new ImmArray<T>(data);
-    }
-#endif
 }
 
 [Serializable]
