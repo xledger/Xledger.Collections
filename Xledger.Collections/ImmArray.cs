@@ -10,6 +10,10 @@ public static class ImmArray {
         return span.ToImmArray();
     }
 #endif
+
+    public static ImmArray<T> Of<T>(Span<T> span) {
+        return span.ToImmArray();
+    }
 }
 
 [Serializable]
