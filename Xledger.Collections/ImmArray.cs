@@ -6,13 +6,93 @@ public static class ImmArray {
     }
 
 #if NET
+#if NET10_0_OR_GREATER
+    [System.Runtime.CompilerServices.OverloadResolutionPriority(1)]
+    public static ImmArray<T> Of<T>(params ReadOnlySpan<T> span) {
+#else
     public static ImmArray<T> Of<T>(ReadOnlySpan<T> span) {
+#endif
         return span.ToImmArray();
     }
 #endif
 
     public static ImmArray<T> Of<T>(Span<T> span) {
         return span.ToImmArray();
+    }
+
+#if NET10_0_OR_GREATER
+    [System.Runtime.CompilerServices.OverloadResolutionPriority(1)]
+    public static ImmArray<T> NewSized<T>(int length, Action<Span<T>> fill) {
+        var data = new T[length];
+        fill(data);
+        return new ImmArray<T>(data);
+    }
+#endif
+
+    public delegate void FillSpan<T>(Span<T> span);
+
+    public static ImmArray<T> NewSized<T>(int length, FillSpan<T> fill) {
+        var data = new T[length];
+        fill(data);
+        return new ImmArray<T>(data);
+    }
+
+#if NET
+    public static ImmArray<T> NewSized<T, Ctx>(int length, Ctx ctx, System.Buffers.SpanAction<T, Ctx> fill) {
+        var data = new T[length];
+        fill(data, ctx);
+        return new ImmArray<T>(data);
+    }
+#endif
+
+    public readonly ref struct ListBuilder<T> {
+        readonly List<T> data;
+
+        public ListBuilder() { this.data = []; }
+        public ListBuilder(int capacity) { this.data = new(capacity); }
+
+        public int Count => this.data.Count;
+
+        public T this[int index] {
+            get => this.data[index];
+            set => this.data[index] = value;
+        }
+
+        public void Add(T item) => this.data.Add(item);
+
+        public void AddRange(IEnumerable<T> items) => this.data.AddRange(items);
+
+        internal T[] ToArray() => this.data.ToArray();
+    }
+
+#if NET10_0_OR_GREATER
+    [System.Runtime.CompilerServices.OverloadResolutionPriority(1)]
+    public static ImmArray<T> New<T>(Action<ListBuilder<T>> fill) {
+        var list = new ListBuilder<T>();
+        fill(list);
+        return new ImmArray<T>(list.ToArray());
+    }
+
+    [System.Runtime.CompilerServices.OverloadResolutionPriority(1)]
+    public static ImmArray<T> New<T>(int capacity, Action<ListBuilder<T>> fill) {
+        var list = new ListBuilder<T>(capacity);
+        fill(list);
+        return new ImmArray<T>(list.ToArray());
+    }
+#endif
+
+    public delegate void BuildList<T>(ListBuilder<T> list);
+
+    public static ImmArray<T> New<T>(BuildList<T> fill) {
+        var list = new ListBuilder<T>();
+        fill(list);
+        return new ImmArray<T>(list.ToArray());
+    }
+
+    public static ImmArray<T> New<T>(int capacity, BuildList<T> fill) {
+        var list = new ListBuilder<T>(capacity);
+        fill(list);
+        return new ImmArray<T>(list.ToArray());
     }
 }
 

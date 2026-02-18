@@ -119,11 +119,7 @@ public static class Extensions {
     }
 
     internal static T[] ArrayOf<T>(IEnumerable<T> xs) {
-        var lst = new List<T>();
-        foreach (var x in xs) {
-            lst.Add(x);
-        }
-        return lst.ToArray();
+        return xs.ToArray();
     }
 
     internal static U[] ArrayOf<T, U>(int n, IEnumerable<T> xs, Func<T, U> f) {

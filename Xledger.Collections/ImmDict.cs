@@ -8,6 +8,63 @@ public static class ImmDict {
     public static ImmDict<K, V> Of<K, V>(params (K, V)[] arr) {
         return arr.ToImmDict();
     }
+
+    //#if NET10_0_OR_GREATER
+    //    [System.Runtime.CompilerServices.OverloadResolutionPriority(1)]
+    //    public static ImmDict<K, V> Of<K, V>(params ReadOnlySpan<(K, V)> span) {
+    //        return span.ToImmDict();
+    //    }
+    //#endif
+
+    public readonly ref struct DictBuilder<K, V> {
+        internal readonly Dictionary<K, V> data;
+
+        public DictBuilder() { this.data = []; }
+        public DictBuilder(int capacity) { this.data = new(capacity); }
+
+        public int Count => this.data.Count;
+
+        public V this[K key] {
+            get => this.data[key];
+            set => this.data[key] = value;
+        }
+
+        public void Add(K key, V value) => this.data.Add(key, value);
+
+        //public void Insert(K key, V value) => this.xs.A
+
+        //public void AddRange(IEnumerable<T> ys) => this.xs.AddRange(ys);
+    }
+
+#if NET10_0_OR_GREATER
+    [System.Runtime.CompilerServices.OverloadResolutionPriority(1)]
+    public static ImmDict<K, V> New<K, V>(Action<DictBuilder<K, V>> fill) {
+        var dict = new DictBuilder<K, V>();
+        fill(dict);
+        return new ImmDict<K, V>(dict.data);
+    }
+
+    [System.Runtime.CompilerServices.OverloadResolutionPriority(1)]
+    public static ImmDict<K, V> New<K, V>(int capacity, Action<DictBuilder<K, V>> fill) {
+        var dict = new DictBuilder<K, V>(capacity);
+        fill(dict);
+        return new ImmDict<K, V>(dict.data);
+    }
+#endif
+
+    public delegate void BuildDict<K, V>(DictBuilder<K, V> dict);
+
+    public static ImmDict<K, V> New<K, V>(BuildDict<K, V> fill) {
+        var dict = new DictBuilder<K, V>();
+        fill(dict);
+        return new ImmDict<K, V>(dict.data);
+    }
+
+    public static ImmDict<K, V> New<K, V>(int capacity, BuildDict<K, V> fill) {
+        var dict = new DictBuilder<K, V>(capacity);
+        fill(dict);
+        return new ImmDict<K, V>(dict.data);
+    }
 }
 
 [Serializable]

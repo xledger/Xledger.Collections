@@ -6,10 +6,79 @@ public static class ImmSet {
     }
 
 #if NET
+#if NET10_0_OR_GREATER
+    [System.Runtime.CompilerServices.OverloadResolutionPriority(1)]
+    public static ImmSet<T> Of<T>(params ReadOnlySpan<T> span) {
+#else
     public static ImmSet<T> Of<T>(ReadOnlySpan<T> span) {
+#endif
         return span.ToImmSet();
     }
 #endif
+
+    public readonly ref struct SetBuilder<T> {
+        internal readonly HashSet<T> data;
+
+        public SetBuilder() { this.data = []; }
+        public SetBuilder(int capacity) { this.data = new(capacity); }
+
+        public int Count => this.data.Count;
+
+        public bool Contains(T item) => this.data.Contains(item);
+
+        public bool TryGetValue(T equalValue, out T actualValue) =>
+            this.data.TryGetValue(equalValue, out actualValue);
+
+        public bool Add(T item) => this.data.Add(item);
+
+        public void AddRange(IEnumerable<T> items) {
+            if (items is null) {
+                return;
+            }
+
+#if NET
+            if (items is ICollection<T> coll) {
+                this.data.EnsureCapacity(this.data.Count + coll.Count);
+            } else if (items is IReadOnlyCollection<T> roColl) {
+                this.data.EnsureCapacity(this.data.Count + roColl.Count);
+            }
+#endif
+
+            foreach (var item in items) {
+                this.data.Add(item);
+            }
+        }
+    }
+
+#if NET10_0_OR_GREATER
+    [System.Runtime.CompilerServices.OverloadResolutionPriority(1)]
+    public static ImmSet<T> New<T>(Action<SetBuilder<T>> fill) {
+        var set = new SetBuilder<T>();
+        fill(set);
+        return new ImmSet<T>(set.data);
+    }
+
+    [System.Runtime.CompilerServices.OverloadResolutionPriority(1)]
+    public static ImmSet<T> New<T>(int capacity, Action<SetBuilder<T>> fill) {
+        var set = new SetBuilder<T>(capacity);
+        fill(set);
+        return new ImmSet<T>(set.data);
+    }
+#endif
+
+    public delegate void BuildSet<T>(SetBuilder<T> set);
+
+    public static ImmSet<T> New<T>(BuildSet<T> fill) {
+        var set = new SetBuilder<T>();
+        fill(set);
+        return new ImmSet<T>(set.data);
+    }
+
+    public static ImmSet<T> New<T>(int capacity, BuildSet<T> fill) {
+        var set = new SetBuilder<T>(capacity);
+        fill(set);
+        return new ImmSet<T>(set.data);
+    }
 }
 
 [Serializable]
