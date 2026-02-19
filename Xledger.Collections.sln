@@ -6,6 +6,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xledger.Collections", "Xled
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xledger.Collections.Test", "Xledger.Collections.Test\Xledger.Collections.Test.csproj", "{312CFF25-A5F7-4ADE-9866-3B3F6319BBEE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xledger.Collections.Bench", "Xledger.Collections.Bench\Xledger.Collections.Bench.csproj", "{EE44BC4F-C699-6623-9FA2-444D857AE154}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,6 +22,10 @@ Global
 		{312CFF25-A5F7-4ADE-9866-3B3F6319BBEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{312CFF25-A5F7-4ADE-9866-3B3F6319BBEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{312CFF25-A5F7-4ADE-9866-3B3F6319BBEE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EE44BC4F-C699-6623-9FA2-444D857AE154}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EE44BC4F-C699-6623-9FA2-444D857AE154}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EE44BC4F-C699-6623-9FA2-444D857AE154}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EE44BC4F-C699-6623-9FA2-444D857AE154}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
