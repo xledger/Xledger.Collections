@@ -103,11 +103,11 @@ public class TestImmDict {
     [Fact]
     public void TestNewSized() {
         var dct = Enumerable.Range(-100, 1_000).ToDictionary(i => i, i => (i * i).ToString());
-        var imm = ImmDict.New<int, string>(1_000, dict => {
+        var imm = ImmDict.Build<int, string>(dict => {
             for (int i = -100, top = 1000 - 100; i < top; ++i) {
                 dict.Add(i, (i * i).ToString());
             }
-        });
+        }, capacity: 1_000);
 
         for (int i = -1000; i < 2000; ++i) {
             Assert.Equal(dct.ContainsKey(i), imm.ContainsKey(i));

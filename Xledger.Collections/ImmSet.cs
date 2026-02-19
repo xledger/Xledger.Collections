@@ -31,52 +31,46 @@ public static class ImmSet {
 
         public bool Add(T item) => this.data.Add(item);
 
-        public void AddRange(IEnumerable<T> items) {
-            if (items is null) {
-                return;
-            }
+        public void ExceptWith(IEnumerable<T> items) =>
+            this.data.ExceptWith(items ?? []);
 
-#if NET
-            if (items is ICollection<T> coll) {
-                this.data.EnsureCapacity(this.data.Count + coll.Count);
-            } else if (items is IReadOnlyCollection<T> roColl) {
-                this.data.EnsureCapacity(this.data.Count + roColl.Count);
-            }
-#endif
+        public void IntersectWith(IEnumerable<T> items) =>
+            this.data.IntersectWith(items ?? []);
 
-            foreach (var item in items) {
-                this.data.Add(item);
-            }
-        }
+        public void UnionWith(IEnumerable<T> items) =>
+            this.data.UnionWith(items ?? []);
     }
 
 #if NET10_0_OR_GREATER
     [System.Runtime.CompilerServices.OverloadResolutionPriority(1)]
-    public static ImmSet<T> New<T>(Action<SetBuilder<T>> fill) {
-        var set = new SetBuilder<T>();
-        fill(set);
-        return new ImmSet<T>(set.data);
-    }
-
-    [System.Runtime.CompilerServices.OverloadResolutionPriority(1)]
-    public static ImmSet<T> New<T>(int capacity, Action<SetBuilder<T>> fill) {
+    public static ImmSet<T> Build<T>(Action<SetBuilder<T>> fill,
+        int capacity = 0,
+        bool trimExcess = false
+    ) {
         var set = new SetBuilder<T>(capacity);
         fill(set);
+        if (trimExcess) {
+            set.data.TrimExcess();
+        }
         return new ImmSet<T>(set.data);
     }
 #endif
 
     public delegate void BuildSet<T>(SetBuilder<T> set);
 
-    public static ImmSet<T> New<T>(BuildSet<T> fill) {
-        var set = new SetBuilder<T>();
-        fill(set);
-        return new ImmSet<T>(set.data);
-    }
 
-    public static ImmSet<T> New<T>(int capacity, BuildSet<T> fill) {
+    /// <summary>
+    /// Safely and quickly build a new ImmSet without having to copy an existing set.
+    /// </summary>
+    /// <param name="fill">Delegate to call to build out the internal set</param>
+    /// <param name="capacity">Default capacity used to instantiate the set</param>
+    /// <param name="trimExcess">If true, TrimExcess is called.</param>
+    public static ImmSet<T> Build<T>(BuildSet<T> fill, int capacity = 0, bool trimExcess = false) {
         var set = new SetBuilder<T>(capacity);
         fill(set);
+        if (trimExcess) {
+            set.data.TrimExcess();
+        }
         return new ImmSet<T>(set.data);
     }
 }

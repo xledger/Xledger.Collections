@@ -187,12 +187,12 @@ public class TestImmArray {
     [Fact]
     public void TestNewSized() {
         var arr = Enumerable.Range(-1, 100).Select(i => $"{i}: {2 * i}").ToArray();
-        var imm = ImmArray.New<string>(100, static span => {
+        var imm = ImmArray.Build<string>(static span => {
             for (int i = 0; i < span.Length; ++i) {
                 var j = i - 1;
                 span[i] = $"{j}: {2 * j}";
             }
-        });
+        }, length: 100);
         Assert.Equal(arr.Length, imm.Length);
         Assert.Equal("-1: -2", imm[0]);
         for (int i = 0; i < imm.Length; ++i) {

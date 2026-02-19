@@ -120,7 +120,7 @@ public class TestImmSet{
     [Fact]
     public void TestNew() {
         var imm = Enumerable.Range(-10, 21).ToImmSet(Math.Abs);
-        var imm2 = ImmSet.New<int>(set => set.AddRange(Enumerable.Range(-10, 21).Select(Math.Abs)));
+        var imm2 = ImmSet.Build<int>(set => set.UnionWith(Enumerable.Range(-10, 21).Select(Math.Abs)));
         Assert.Equal(11, imm.Count);
         Assert.Equivalent(imm, imm2);
     }
