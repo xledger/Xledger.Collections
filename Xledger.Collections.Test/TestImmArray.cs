@@ -199,5 +199,22 @@ public class TestImmArray {
             Assert.Equal(arr[i], imm[i]);
         }
     }
+
+    [Fact]
+    public void TestOf() {
+        var x = ImmArray.Of(new int[] { 1 });
+        Assert.Equal(typeof(ImmArray<int>), x.GetType());
+
+        var y = ImmArray.Of(1);
+        Assert.Equal(typeof(ImmArray<int>), y.GetType());
+
+#if NET
+        var z = ImmArray.Of((ReadOnlySpan<int>)[1]);
+        Assert.Equal(typeof(ImmArray<int>), z.GetType());
+#endif
+
+        var a = ImmArray.Of<int[]>(new int[] { 1 });
+        Assert.Equal(typeof(ImmArray<int[]>), a.GetType());
+    }
 }
 
