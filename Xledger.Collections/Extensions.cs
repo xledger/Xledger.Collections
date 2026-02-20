@@ -28,6 +28,10 @@ public static class Extensions {
     }
 #endif
 
+    public static ImmArray<T> ToImmArray<T>(this Span<T> xs) {
+        return new ImmArray<T>(xs.ToArray());
+    }
+
     public static ImmSet<T> ToImmSet<T>(this IEnumerable<T> xs) {
         return xs switch {
             null => ImmSet<T>.Empty,
@@ -45,9 +49,21 @@ public static class Extensions {
 
 #if NET
     public static ImmSet<T> ToImmSet<T>(this ReadOnlySpan<T> xs) {
-        return new ImmSet<T>(xs.ToArray());
+        var set = new HashSet<T>(xs.Length);
+        foreach (var x in xs) {
+            set.Add(x);
+        }
+        return new ImmSet<T>(set);
     }
 #endif
+
+    public static ImmSet<T> ToImmSet<T>(this Span<T> xs) {
+        var set = new HashSet<T>(xs.Length);
+        foreach (var x in xs) {
+            set.Add(x);
+        }
+        return new ImmSet<T>(set);
+    }
 
     public static ImmDict<K, V> ToImmDict<K, V>(this IEnumerable<KeyValuePair<K, V>> xs) {
         return xs switch {
@@ -103,11 +119,7 @@ public static class Extensions {
     }
 
     internal static T[] ArrayOf<T>(IEnumerable<T> xs) {
-        var lst = new List<T>();
-        foreach (var x in xs) {
-            lst.Add(x);
-        }
-        return lst.ToArray();
+        return xs.ToArray();
     }
 
     internal static U[] ArrayOf<T, U>(int n, IEnumerable<T> xs, Func<T, U> f) {

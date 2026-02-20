@@ -183,5 +183,52 @@ public class TestImmArray {
             Assert.Equal(arr[i], imm[i]);
         }
     }
+
+    [Fact]
+    public void TestNewSized() {
+        var arr = Enumerable.Range(-1, 100).Select(i => $"{i}: {2 * i}").ToArray();
+        var imm = ImmArray.Build<string>(static span => {
+            for (int i = 0; i < span.Length; ++i) {
+                var j = i - 1;
+                span[i] = $"{j}: {2 * j}";
+            }
+        }, length: 100);
+        Assert.Equal(arr.Length, imm.Length);
+        Assert.Equal("-1: -2", imm[0]);
+        for (int i = 0; i < imm.Length; ++i) {
+            Assert.Equal(arr[i], imm[i]);
+        }
+    }
+
+    [Fact]
+    public void TestOf() {
+        var x = ImmArray.Of(new int[] { 1 });
+        Assert.Equal(typeof(ImmArray<int>), x.GetType());
+
+        var y = ImmArray.Of(1);
+        Assert.Equal(typeof(ImmArray<int>), y.GetType());
+
+#if NET
+        var z = ImmArray.Of((ReadOnlySpan<int>)[1]);
+        Assert.Equal(typeof(ImmArray<int>), z.GetType());
+#endif
+
+        var a = ImmArray.Of<int[]>(new int[] { 1 });
+        Assert.Equal(typeof(ImmArray<int[]>), a.GetType());
+
+        var b = ImmArray.Of(new ImplicitIntArray(1));
+        Assert.Equal(typeof(ImmArray<ImplicitIntArray>), b.GetType());
+
+        var c = ImmArray.Of(new ExplicitIntArray(1));
+        Assert.Equal(typeof(ImmArray<ExplicitIntArray>), c.GetType());
+    }
+
+    public record ImplicitIntArray(int i) {
+        public static implicit operator int[](ImplicitIntArray arr) => [arr.i];
+    }
+
+    public record ExplicitIntArray(int i) {
+        public static explicit operator int[](ExplicitIntArray arr) => [arr.i];
+    }
 }
 

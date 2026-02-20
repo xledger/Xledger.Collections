@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Xledger.Collections;
 
 public static class ImmDict {
@@ -7,6 +9,92 @@ public static class ImmDict {
 
     public static ImmDict<K, V> Of<K, V>(params (K, V)[] arr) {
         return arr.ToImmDict();
+    }
+
+    public readonly ref struct DictBuilder<K, V> {
+        internal readonly Dictionary<K, V> data;
+
+        public DictBuilder() { this.data = []; }
+        public DictBuilder(int capacity) { this.data = new(capacity); }
+
+        public int Count => this.data.Count;
+
+        public bool ContainsKey(K key) => this.data.ContainsKey(key);
+
+        public bool ContainsValue(V value) => this.data.ContainsValue(value);
+
+#if NET
+        public bool TryGetValue(K key, [MaybeNullWhen(false)] out V value) =>
+#else
+        public bool TryGetValue(K key, out V value) =>
+#endif
+            this.data.TryGetValue(key, out value);
+
+        public V this[K key] {
+            get => this.data[key];
+            set => this.data[key] = value;
+        }
+
+        public void Add(K key, V value) => this.data.Add(key, value);
+
+        public bool TryAdd(K key, V value) {
+#if NET
+            return this.data.TryAdd(key, value);
+#else
+            if (this.data.ContainsKey(key)) {
+                return false;
+            } else {
+                this.data.Add(key, value);
+                return true;
+            }
+#endif
+        }
+    }
+
+#if NET10_0_OR_GREATER
+    /// <summary>
+    /// Safely and quickly build a new ImmDict without having to copy an existing dictionary.
+    /// </summary>
+    /// <param name="fill">Delegate to call to build out the internal dictionary</param>
+    /// <param name="capacity">Default capacity used to instantiate the dictionary</param>
+    /// <param name="trimExcess">If true, TrimExcess is called. Ignored on .NET Framework.</param>
+    [System.Runtime.CompilerServices.OverloadResolutionPriority(1)]
+    public static ImmDict<K, V> Build<K, V>(Action<DictBuilder<K, V>> fill,
+        int capacity = 0,
+        bool trimExcess = false
+    ) {
+        var dict = new DictBuilder<K, V>(capacity);
+        fill(dict);
+#if NET
+        if (trimExcess) {
+            dict.data.TrimExcess();
+        }
+#endif
+        return new ImmDict<K, V>(dict.data);
+    }
+#endif
+
+    public delegate void BuildDict<K, V>(DictBuilder<K, V> dict);
+
+    /// <summary>
+    /// Safely and quickly build a new ImmDict without having to copy an existing dictionary.
+    /// </summary>
+    /// <param name="fill">Delegate to call to build out the internal dictionary</param>
+    /// <param name="capacity">Default capacity used to instantiate the dictionary</param>
+    /// <param name="trimExcess">If true, TrimExcess is called. Ignored on .NET Framework.</param>
+    public static ImmDict<K, V> Build<K, V>(
+        BuildDict<K, V> fill,
+        int capacity = 0,
+        bool trimExcess = false
+    ) {
+        var dict = new DictBuilder<K, V>(capacity);
+        fill(dict);
+#if NET
+        if (trimExcess) {
+            dict.data.TrimExcess();
+        }
+#endif
+        return new ImmDict<K, V>(dict.data);
     }
 }
 

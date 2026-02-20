@@ -6,10 +6,32 @@ public static class ImmArray {
     }
 
 #if NET
+#if NET10_0_OR_GREATER
+    [System.Runtime.CompilerServices.OverloadResolutionPriority(1)]
+    public static ImmArray<T> Of<T>(params ReadOnlySpan<T> span) {
+#else
     public static ImmArray<T> Of<T>(ReadOnlySpan<T> span) {
-        return span.ToImmArray();
+#endif
+        return new ImmArray<T>(span);
     }
 #endif
+
+#if NET10_0_OR_GREATER
+    [System.Runtime.CompilerServices.OverloadResolutionPriority(1)]
+    public static ImmArray<T> Build<T>(Action<Span<T>> fill, int length) {
+        var data = new T[length];
+        fill(data);
+        return new ImmArray<T>(data);
+    }
+#endif
+
+    public delegate void FillSpan<T>(Span<T> span);
+
+    public static ImmArray<T> Build<T>(FillSpan<T> fill, int length) {
+        var data = new T[length];
+        fill(data);
+        return new ImmArray<T>(data);
+    }
 }
 
 [Serializable]
@@ -53,6 +75,13 @@ public sealed class ImmArray<T> : IReadOnlyList<T>, IEquatable<ImmArray<T>>, ILi
         } else {
             this.data = Extensions.ArrayOf(data);
         }
+    }
+
+    /// <summary>
+    /// Constructs an ImmArray by copying the span's contents.
+    /// </summary>
+    public ImmArray(params ReadOnlySpan<T> data) {
+        this.data = data.ToArray();
     }
 
     public ReadOnlySpan<T> Span => this.data;
