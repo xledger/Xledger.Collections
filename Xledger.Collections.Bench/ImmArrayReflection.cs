@@ -25,7 +25,11 @@ public class ImmArrayReflection {
         return ImmArray.Build<string>(FillSpan, length: this.Length);
     }
 
-    static readonly ConstructorInfo CI_NoCopy = typeof(ImmArray<string>).GetConstructor([typeof(string[])]);
+    static readonly ConstructorInfo CI_NoCopy = typeof(ImmArray<string>).GetConstructor(
+        BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.ExactBinding,
+        binder: null,
+        [typeof(string[])],
+        modifiers: null);
     static readonly MethodInfo MI_Build = typeof(ImmArray).GetMethods()
         .Where(mi =>
             mi.Name == nameof(ImmArray.Build)
