@@ -215,6 +215,20 @@ public class TestImmArray {
 
         var a = ImmArray.Of<int[]>(new int[] { 1 });
         Assert.Equal(typeof(ImmArray<int[]>), a.GetType());
+
+        var b = ImmArray.Of(new ImplicitIntArray(1));
+        Assert.Equal(typeof(ImmArray<ImplicitIntArray>), b.GetType());
+
+        var c = ImmArray.Of(new ExplicitIntArray(1));
+        Assert.Equal(typeof(ImmArray<ExplicitIntArray>), c.GetType());
+    }
+
+    public record ImplicitIntArray(int i) {
+        public static implicit operator int[](ImplicitIntArray arr) => [arr.i];
+    }
+
+    public record ExplicitIntArray(int i) {
+        public static explicit operator int[](ExplicitIntArray arr) => [arr.i];
     }
 }
 
