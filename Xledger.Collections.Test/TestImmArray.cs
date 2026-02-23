@@ -234,6 +234,7 @@ public class TestImmArray {
         var x = new ImmArray<int>(new int[] { 1 });
         Assert.Equal(typeof(ImmArray<int>), x.GetType());
 
+#if NET10_0_OR_GREATER
         var y = new ImmArray<int>(1);
         Assert.Equal(typeof(ImmArray<int>), y.GetType());
 
@@ -248,6 +249,7 @@ public class TestImmArray {
 
         var c = new ImmArray<ExplicitIntArray>(new ExplicitIntArray(1));
         Assert.Equal(typeof(ImmArray<ExplicitIntArray>), c.GetType());
+#endif
     }
 
     public record ImplicitIntArray(int i) {
