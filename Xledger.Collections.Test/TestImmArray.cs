@@ -3,14 +3,23 @@ namespace Xledger.Collections.Test;
 public class TestImmArray {
     [Fact]
     public void TestEmpty() {
+#if NET
+        var emptyCtor = typeof(ImmArray<string>).GetConstructor(
+            System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic,
+            []);
+        var emptyArr = (ImmArray<string>)emptyCtor.Invoke([]);
+#else
+        var emptyArr = ImmArray<string>.Empty;
+#endif
+
         var imm = ImmArray<string>.Empty;
         Assert.Empty(imm);
         Assert.Equal(0, imm.Count);
         Assert.False(imm.GetEnumerator().MoveNext());
-        Assert.Equal(imm.GetHashCode(), new ImmArray<string>().GetHashCode());
-        Assert.Equal(imm, new ImmArray<string>());
+        Assert.Equal(imm.GetHashCode(), emptyArr.GetHashCode());
+        Assert.Equal(imm, emptyArr);
         Assert.Equal(imm, imm);
-        Assert.Equal(new ImmArray<string>(), imm);
+        Assert.Equal(emptyArr, imm);
         Assert.Equal("[]", imm.ToString());
 
         Assert.False(imm.Equals((object)null));

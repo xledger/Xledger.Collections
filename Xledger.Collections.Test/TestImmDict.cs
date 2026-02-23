@@ -3,14 +3,23 @@ namespace Xledger.Collections.Test;
 public class TestImmDict {
     [Fact]
     public void TestEmpty() {
+#if NET
+        var emptyCtor = typeof(ImmDict<string, object>).GetConstructor(
+            System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic,
+            []);
+        var emptyDict = (ImmDict<string, object>)emptyCtor.Invoke([]);
+#else
+        var emptyDict = ImmDict<string, object>.Empty;
+#endif
+
         var imm = ImmDict<string, object>.Empty;
         Assert.Empty(imm);
         Assert.Equal(0, imm.Count);
         Assert.False(imm.GetEnumerator().MoveNext());
-        Assert.Equal(imm.GetHashCode(), new ImmDict<string, object>().GetHashCode());
-        Assert.Equal(imm, new ImmDict<string, object>());
+        Assert.Equal(imm.GetHashCode(), emptyDict.GetHashCode());
+        Assert.Equal(imm, emptyDict);
         Assert.Equal(imm, imm);
-        Assert.Equal(new ImmDict<string, object>(), imm);
+        Assert.Equal(emptyDict, imm);
         Assert.Equal("[]", imm.ToString());
 
         Assert.False(imm.Equals((object)null));
