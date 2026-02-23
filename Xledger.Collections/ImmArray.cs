@@ -8,10 +8,11 @@ public static class ImmArray {
 #if NET10_0_OR_GREATER
     [System.Runtime.CompilerServices.OverloadResolutionPriority(1)]
     public static ImmArray<T> Of<T>(params ReadOnlySpan<T> span) {
+        return new ImmArray<T>(span);
 #else
     public static ImmArray<T> Of<T>(ReadOnlySpan<T> span) {
+        return new ImmArray<T>(span.ToArray());
 #endif
-        return new ImmArray<T>(span);
     }
 
 #if NET10_0_OR_GREATER
@@ -73,12 +74,14 @@ public sealed class ImmArray<T> : IReadOnlyList<T>, IEquatable<ImmArray<T>>, ILi
         }
     }
 
+#if NET10_0_OR_GREATER
     /// <summary>
     /// Constructs an ImmArray by copying the span's contents.
     /// </summary>
     public ImmArray(params ReadOnlySpan<T> data) {
         this.data = data.ToArray();
     }
+#endif
 
     public ReadOnlySpan<T> Span => this.data;
 
