@@ -223,6 +223,35 @@ public class TestImmArray {
         Assert.Equal(typeof(ImmArray<ExplicitIntArray>), c.GetType());
     }
 
+
+    [Fact]
+    public void TestNew() {
+        var wArr = new object[1] { "foo", };
+        var w = new ImmArray<object>(wArr);
+        Assert.Equal(typeof(ImmArray<object>), w.GetType());
+        Assert.Equal("foo", w[0]);
+
+        var x = new ImmArray<int>(new int[] { 1 });
+        Assert.Equal(typeof(ImmArray<int>), x.GetType());
+
+#if NET10_0_OR_GREATER
+        var y = new ImmArray<int>(1);
+        Assert.Equal(typeof(ImmArray<int>), y.GetType());
+
+        var z =  new ImmArray<int>((ReadOnlySpan<int>)[1]);
+        Assert.Equal(typeof(ImmArray<int>), z.GetType());
+
+        var a = new ImmArray<int[]>(new int[] { 1 });
+        Assert.Equal(typeof(ImmArray<int[]>), a.GetType());
+
+        var b = new ImmArray<ImplicitIntArray>(new ImplicitIntArray(1));
+        Assert.Equal(typeof(ImmArray<ImplicitIntArray>), b.GetType());
+
+        var c = new ImmArray<ExplicitIntArray>(new ExplicitIntArray(1));
+        Assert.Equal(typeof(ImmArray<ExplicitIntArray>), c.GetType());
+#endif
+    }
+
     public record ImplicitIntArray(int i) {
         public static implicit operator int[](ImplicitIntArray arr) => [arr.i];
     }
