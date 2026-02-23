@@ -35,9 +35,7 @@ public static class ImmArray {
 [Serializable]
 [DebuggerDisplay("Count = {Count}")]
 [DebuggerTypeProxy(typeof(ImmArray<>.DebugView))]
-#if NET8_0_OR_GREATER
 [System.Runtime.CompilerServices.CollectionBuilder(typeof(ImmArray), nameof(ImmArray.Of))]
-#endif
 public sealed class ImmArray<T> : IReadOnlyList<T>, IEquatable<ImmArray<T>>, IList<T>,
     ICollection, IComparable, IComparable<ImmArray<T>>, IStructuralComparable
 {

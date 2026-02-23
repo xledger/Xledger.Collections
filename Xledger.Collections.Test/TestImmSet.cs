@@ -39,6 +39,12 @@ public class TestImmSet{
         Assert.Equal(imm1.GetHashCode(), imm2.GetHashCode());
         Assert.Equal(imm1, imm2);
         Assert.Equal(imm2, imm1);
+
+
+        var imm3 = (ImmSet<int>)[1];
+        Assert.Equal(imm1.GetHashCode(), imm3.GetHashCode());
+        Assert.Equal(imm1, imm3);
+        Assert.Equal(imm3, imm1);
     }
 
 #if NET8_0_OR_GREATER
