@@ -5,7 +5,6 @@ public static class ImmArray {
         return arr.ToImmArray();
     }
 
-#if NET
 #if NET10_0_OR_GREATER
     [System.Runtime.CompilerServices.OverloadResolutionPriority(1)]
     public static ImmArray<T> Of<T>(params ReadOnlySpan<T> span) {
@@ -14,7 +13,6 @@ public static class ImmArray {
 #endif
         return new ImmArray<T>(span);
     }
-#endif
 
 #if NET10_0_OR_GREATER
     [System.Runtime.CompilerServices.OverloadResolutionPriority(1)]

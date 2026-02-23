@@ -5,7 +5,6 @@ public static class ImmSet {
         return arr.ToImmSet();
     }
 
-#if NET
 #if NET10_0_OR_GREATER
     [System.Runtime.CompilerServices.OverloadResolutionPriority(1)]
     public static ImmSet<T> Of<T>(params ReadOnlySpan<T> span) {
@@ -14,7 +13,6 @@ public static class ImmSet {
 #endif
         return span.ToImmSet();
     }
-#endif
 
     public readonly ref struct SetBuilder<T> {
         internal readonly HashSet<T> data;

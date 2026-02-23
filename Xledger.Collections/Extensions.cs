@@ -22,11 +22,9 @@ public static class Extensions {
         };
     }
 
-#if NET
     public static ImmArray<T> ToImmArray<T>(this ReadOnlySpan<T> xs) {
         return new ImmArray<T>(xs.ToArray());
     }
-#endif
 
     public static ImmArray<T> ToImmArray<T>(this Span<T> xs) {
         return new ImmArray<T>(xs.ToArray());
@@ -47,7 +45,6 @@ public static class Extensions {
         };
     }
 
-#if NET
     public static ImmSet<T> ToImmSet<T>(this ReadOnlySpan<T> xs) {
         var set = new HashSet<T>(xs.Length);
         foreach (var x in xs) {
@@ -55,7 +52,6 @@ public static class Extensions {
         }
         return new ImmSet<T>(set);
     }
-#endif
 
     public static ImmSet<T> ToImmSet<T>(this Span<T> xs) {
         var set = new HashSet<T>(xs.Length);
