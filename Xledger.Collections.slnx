@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Xledger.Collections.Bench/Xledger.Collections.Bench.csproj" />
+  <Project Path="Xledger.Collections.Test/Xledger.Collections.Test.csproj" />
+  <Project Path="Xledger.Collections/Xledger.Collections.csproj" />
+</Solution>
